@@ -1327,15 +1327,20 @@ let iconsList = [];
     let audioPlayer = null;
     let isPlaying = false;
 
-    async function fetchAutoData() {
-      try {
-        const response = await fetch(`${API_URL}/api/catalog`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            movies: moviesData.map(({ title, originalTitle, year, actors }) => ({ title, originalTitle, year, actors }))
-          })
-        });
+   async function fetchAutoData() {
+  try {
+    const response = await fetch(`${API_URL}/api/catalog`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        movies: moviesData.map(({ title, originalTitle, year, actors }) => ({
+          title,
+          originalTitle,
+          year,
+          actors
+        }))
+      })
+    });
         if (!response.ok) throw new Error(`API ${response.status}`);
         const payload = await response.json();
         const byId = new Map((payload.movies || []).map(item => [item.sourceTitle + "|" + item.year, item]));
