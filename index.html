@@ -579,6 +579,19 @@
       justify-content: center;
       transition: transform 0.2s;
     }
+    .cd-disc.has-cover {
+      background-repeat: no-repeat;
+      border: 5px solid #111;
+    }
+    .cd-disc.has-cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, transparent 0 12%, rgba(255,255,255,0.12) 13%, transparent 14% 34%, rgba(255,255,255,0.10) 35%, transparent 36% 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
     .cd-disc.spinning {
       animation: spinCD 3.5s linear infinite;
     }
@@ -1027,6 +1040,8 @@
         💌 erikolskaya.nastya@gmail.com
       </a>
 
+      <div style="font-size:0.78rem;color:#8C6A88;">Постеры и данные об актёрах загружаются автоматически через TMDB. Этот продукт использует TMDB API, но не одобрен и не сертифицирован TMDB.</div>
+
       <div class="footer-copy">
         #РОМКОМЖИВ • 2000s Forever ✨💿 Made with endless nostalgic love
       </div>
@@ -1067,8 +1082,14 @@
     }
 
 /* ==========================================================
-       2. БАЗА ДАННЫХ ФИЛЬМОВ (ПРЯМЫЕ ССЫЛКИ TMDB БЕЗ ПРОКСИ)
+       2. БАЗА ДАННЫХ ФИЛЬМОВ (РЕДАКТОРСКИЕ ДАННЫЕ + АВТОМАТИЧЕСКИЕ РЕСУРСЫ)
        ========================================================== */
+    /* ==========================================================
+       АВТОМАТИЧЕСКОЕ ОБОГАЩЕНИЕ ДАННЫХ
+       ========================================================== */
+    const API_URL = "https://romcom-api.alinenokarkhipovastarco.workers.dev/";
+    let autoDataLoaded = false;
+
     const moviesData = [
       {
         id: 1,
@@ -1291,55 +1312,96 @@
     /* ==========================================================
        3. ЗВЁЗДЫ ЖАНРА
        ========================================================== */
-const iconsList = [
-      { name: "Линдси Лохан", avatar: "https://image.tmdb.org/t/p/w300/aSp4b3N2gJ8P2s7mJ2R3k9O8U.jpg" },
-      { name: "Кэтрин Хайгл", avatar: "https://image.tmdb.org/t/p/w300/sW4YF8jK2d6L1K3U5Y9H2rX4P.jpg" },
-      { name: "Глен Пауэлл", avatar: "https://image.tmdb.org/t/p/w300/m1wU8D2O6Q4K8rL1S9T3Y5P7.jpg" },
-      { name: "Мэттью Макконахи", avatar: "https://image.tmdb.org/t/p/w300/eFJ6Y7J3sK9L2O8R4T1U5W7.jpg" },
-      { name: "Кэмерон Диаз", avatar: "https://image.tmdb.org/t/p/w300/tF4Y8sK2L9O8R3T1U5W7eJ9.jpg" },
-      { name: "Аманда Сейфрид", avatar: "https://image.tmdb.org/t/p/w300/bL4Y8sK2d6L1K3U5Y9H2rX4.jpg" },
-      { name: "Анна Фэрис", avatar: "https://image.tmdb.org/t/p/w300/cF4Y8sK2L9O8R3T1U5W7eJ2.jpg" },
-      { name: "Эмма Стоун", avatar: "https://image.tmdb.org/t/p/w300/d4Y8sK2L9O8R3T1U5W7eJ8.jpg" },
-      { name: "Дженнифер Гарнер", avatar: "https://image.tmdb.org/t/p/w300/e4Y8sK2L9O8R3T1U5W7eJ5.jpg" },
-      { name: "Джерард Батлер", avatar: "https://image.tmdb.org/t/p/w300/f4Y8sK2L9O8R3T1U5W7eJ1.jpg" },
-      { name: "Аманда Байнс", avatar: "https://image.tmdb.org/t/p/w300/g4Y8sK2L9O8R3T1U5W7eJ9.jpg" },
-      { name: "София Карсон", avatar: "https://image.tmdb.org/t/p/w300/h4Y8sK2L9O8R3T1U5W7eJ3.jpg" },
-      { name: "Зои Дойч", avatar: "https://image.tmdb.org/t/p/w300/i4Y8sK2L9O8R3T1U5W7eJ7.jpg" }
-    ];
+// Список звёзд больше не хранится вручную.
+// Он собирается из actors + profile_path, полученных автоматически.
+let iconsList = [];
 
 /* ==========================================================
        4. ПЛЕЙЛИСТ РОМКОМ-РАДИО (ПРЯМЫЕ MP3 БЕЗ БЛОКИРОВОК)
        ========================================================== */
-    const playlist = [
-      {
-        track: "Kiss Me (Guitar Acoustic Vibe)",
-        artist: "Sixpence None the Richer",
-        movie: "Это всё она",
-        src: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-acoustic-guitar-112191.mp3"
-      },
-      {
-        track: "Unwritten (Feel Good Pop)",
-        artist: "Natasha Bedingfield",
-        movie: "Кто угодно, кроме тебя",
-        src: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=uplifting-day-15876.mp3"
-      },
-      {
-        track: "Suddenly I See (Y2K Glam Beat)",
-        artist: "KT Tunstall",
-        movie: "Дьявол носит Prada",
-        src: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=energetic-indie-rock-103323.mp3"
-      },
-      {
-        track: "Bubbly (Sweet Sunday Coffee)",
-        artist: "Colbie Caillat",
-        movie: "Уютный романтический вечер",
-        src: "https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3?filename=acoustic-guitars-ambient-uplifting-112189.mp3"
-      }
-    ];
+    // Радио строится только из реально найденных soundtrack + легальных preview.
+    // Старые случайные MP3 из исходника намеренно удалены.
+    let playlist = [];
 
     let currentTrackIdx = 0;
     let audioPlayer = null;
     let isPlaying = false;
+
+    async function fetchAutoData() {
+      try {
+        const response = await fetch(`${AUTO_DATA_API}/catalog`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            movies: moviesData.map(({ title, originalTitle, year, actors }) => ({ title, originalTitle, year, actors }))
+          })
+        });
+        if (!response.ok) throw new Error(`API ${response.status}`);
+        const payload = await response.json();
+        const byId = new Map((payload.movies || []).map(item => [item.sourceTitle + "|" + item.year, item]));
+
+        moviesData.forEach(movie => {
+          const auto = byId.get((movie.originalTitle || movie.title) + "|" + movie.year) || byId.get(movie.title + "|" + movie.year);
+          if (!auto) return;
+
+          if (auto.poster) movie.poster = auto.poster;
+          if (Array.isArray(auto.actors) && auto.actors.length) movie.actors = auto.actors;
+          if (auto.soundtrack?.track) {
+            movie.soundtrack = `${auto.soundtrack.artist} — ${auto.soundtrack.track}`;
+            movie.soundtrackData = auto.soundtrack;
+          }
+        });
+
+        playlist = moviesData
+          .filter(movie => movie.soundtrackData?.preview)
+          .map(movie => ({
+            track: movie.soundtrackData.track,
+            artist: movie.soundtrackData.artist,
+            movie: movie.title,
+            src: movie.soundtrackData.preview,
+            cover: movie.soundtrackData.cover
+          }));
+
+        autoDataLoaded = true;
+        renderIcons();
+        renderMovies();
+        setupRadioRefresh();
+      } catch (error) {
+        console.warn("Автоматические данные не загрузились. Оставляем исходные данные:", error);
+        renderIcons();
+        renderMovies();
+      }
+    }
+
+    function setupRadioRefresh() {
+      const disc = document.getElementById("cdDisc");
+      const playBtn = document.getElementById("radioPlayBtn");
+      const prevBtn = document.getElementById("radioPrevBtn");
+      const nextBtn = document.getElementById("radioNextBtn");
+      const marquee = document.getElementById("radioMarquee");
+      const sub = document.getElementById("radioSub");
+      if (!playlist.length) {
+        marquee.innerText = "Саундтрек пока не найден";
+        sub.innerText = "Автоматический поиск не вернул доступный preview";
+        playBtn.disabled = true;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+      playBtn.disabled = false;
+      prevBtn.disabled = playlist.length < 2;
+      nextBtn.disabled = playlist.length < 2;
+      const item = playlist[currentTrackIdx % playlist.length];
+      currentTrackIdx = currentTrackIdx % playlist.length;
+      marquee.innerText = `${item.artist} — ${item.track}`;
+      sub.innerText = `Саундтрек: «${item.movie}»`;
+      if (item.cover) {
+        disc.style.backgroundImage = `url("${item.cover}")`;
+        disc.style.backgroundSize = "cover";
+        disc.style.backgroundPosition = "center";
+        disc.classList.add("has-cover");
+      }
+    }
 
     function setupRadio() {
       const playBtn = document.getElementById("radioPlayBtn");
@@ -1347,88 +1409,94 @@ const iconsList = [
       const nextBtn = document.getElementById("radioNextBtn");
       const disc = document.getElementById("cdDisc");
 
-      // Ленивая инициализация плеера прямо по взаимодействию пользователя
       function initAudio() {
-        if (!audioPlayer) {
-          audioPlayer = new Audio();
-          audioPlayer.preload = "auto";
-          audioPlayer.addEventListener("ended", () => {
-            currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
-            loadAndPlayTrack();
-          });
-          audioPlayer.addEventListener("error", (e) => {
-            console.error("Ошибка аудио:", e);
-            disc.classList.remove("spinning");
-            isPlaying = false;
-            playBtn.innerText = "▶ Старт";
-          });
-        }
-      }
-
-      function updateTrackUI() {
-        const item = playlist[currentTrackIdx];
-        document.getElementById("radioMarquee").innerText = `${item.artist} — ${item.track}`;
-        document.getElementById("radioSub").innerText = `Саундтрек: «${item.movie}»`;
-      }
-
-      function loadAndPlayTrack() {
-        initAudio();
-        updateTrackUI();
-        audioPlayer.src = playlist[currentTrackIdx].src;
-        audioPlayer.play().then(() => {
+        if (audioPlayer) return;
+        audioPlayer = new Audio();
+        audioPlayer.preload = "none";
+        audioPlayer.addEventListener("play", () => {
           isPlaying = true;
           playBtn.innerText = "⏸ Пауза";
           disc.classList.add("spinning");
-        }).catch(err => {
-          console.warn("Воспроизведение отклонено браузером:", err);
+        });
+        audioPlayer.addEventListener("pause", () => {
           isPlaying = false;
           playBtn.innerText = "▶ Старт";
           disc.classList.remove("spinning");
         });
+        audioPlayer.addEventListener("ended", () => {
+          if (!playlist.length) return;
+          currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
+          loadTrack(currentTrackIdx, true);
+        });
+        audioPlayer.addEventListener("error", () => {
+          isPlaying = false;
+          playBtn.innerText = "▶ Старт";
+          disc.classList.remove("spinning");
+          document.getElementById("radioSub").innerText = "Не удалось загрузить preview этого трека";
+        });
+      }
+
+      function paintDisc(item) {
+        if (item && item.cover) {
+          disc.style.backgroundImage = `url("${item.cover}")`;
+          disc.style.backgroundSize = "cover";
+          disc.style.backgroundPosition = "center";
+          disc.classList.add("has-cover");
+        } else {
+          disc.style.backgroundImage = "";
+          disc.classList.remove("has-cover");
+        }
+      }
+
+      function updateTrackUI() {
+        if (!playlist.length) {
+          document.getElementById("radioMarquee").innerText = "Саундтрек пока не найден";
+          document.getElementById("radioSub").innerText = "Для этого радио нужен найденный preview";
+          playBtn.disabled = true;
+          prevBtn.disabled = true;
+          nextBtn.disabled = true;
+          paintDisc(null);
+          return;
+        }
+        const item = playlist[currentTrackIdx];
+        document.getElementById("radioMarquee").innerText = `${item.artist} — ${item.track}`;
+        document.getElementById("radioSub").innerText = `Саундтрек: «${item.movie}»`;
+        playBtn.disabled = false;
+        prevBtn.disabled = playlist.length < 2;
+        nextBtn.disabled = playlist.length < 2;
+        paintDisc(item);
+      }
+
+      function loadTrack(index, autoplay = false) {
+        if (!playlist.length) return;
+        currentTrackIdx = (index + playlist.length) % playlist.length;
+        const item = playlist[currentTrackIdx];
+        updateTrackUI();
+        initAudio();
+        audioPlayer.src = item.src;
+        audioPlayer.load();
+        if (autoplay) audioPlayer.play().catch(() => {});
       }
 
       updateTrackUI();
 
       playBtn.addEventListener("click", () => {
+        if (!playlist.length) return;
         initAudio();
-        if (!isPlaying) {
-          if (!audioPlayer.src || audioPlayer.src === "") {
+        if (audioPlayer.paused) {
+          if (!audioPlayer.src || !audioPlayer.src.includes(encodeURIComponent(playlist[currentTrackIdx].src))) {
             audioPlayer.src = playlist[currentTrackIdx].src;
           }
-          audioPlayer.play().then(() => {
-            isPlaying = true;
-            playBtn.innerText = "⏸ Пауза";
-            disc.classList.add("spinning");
-          }).catch(err => {
-            console.warn("Play error:", err);
+          audioPlayer.play().catch(() => {
+            document.getElementById("radioSub").innerText = "Нажми «Старт» ещё раз, если браузер заблокировал звук";
           });
         } else {
           audioPlayer.pause();
-          isPlaying = false;
-          playBtn.innerText = "▶ Старт";
-          disc.classList.remove("spinning");
         }
       });
 
-      prevBtn.addEventListener("click", () => {
-        currentTrackIdx = (currentTrackIdx - 1 + playlist.length) % playlist.length;
-        if (isPlaying) {
-          loadAndPlayTrack();
-        } else {
-          updateTrackUI();
-          if (audioPlayer) audioPlayer.src = playlist[currentTrackIdx].src;
-        }
-      });
-
-      nextBtn.addEventListener("click", () => {
-        currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
-        if (isPlaying) {
-          loadAndPlayTrack();
-        } else {
-          updateTrackUI();
-          if (audioPlayer) audioPlayer.src = playlist[currentTrackIdx].src;
-        }
-      });
+      prevBtn.addEventListener("click", () => loadTrack(currentTrackIdx - 1, !audioPlayer || !audioPlayer.paused));
+      nextBtn.addEventListener("click", () => loadTrack(currentTrackIdx + 1, !audioPlayer || !audioPlayer.paused));
     }
 
     let activeFilterTag = "all";
@@ -1443,6 +1511,7 @@ const iconsList = [
       setupQuizEvents();
       setupRadio();
       setupModal();
+      fetchAutoData();
       setupLiveSearch();
       setupSort();
     });
@@ -1450,23 +1519,31 @@ const iconsList = [
 function renderIcons() {
       const container = document.getElementById("iconsRow");
       container.innerHTML = "";
+
+      const unique = new Map();
+      moviesData.forEach(movie => {
+        (movie.actors || []).forEach(actor => {
+          const name = typeof actor === "string" ? actor : actor.name;
+          const photo = typeof actor === "object" ? actor.photo : null;
+          if (name && !unique.has(name)) unique.set(name, { name, avatar: photo });
+        });
+      });
+      iconsList = [...unique.values()];
+
       iconsList.forEach(star => {
         const item = document.createElement("div");
         item.className = "icon-chip";
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(star.name)}&background=FF2E93&color=fff&size=150&bold=true`;
-
         item.innerHTML = `
           <div class="icon-avatar-wrap">
-            <img src="${star.avatar}" alt="${star.name}" class="icon-avatar" onerror="this.onerror=null; this.src='${fallbackAvatar}';" loading="lazy">
+            <img src="${star.avatar || fallbackAvatar}" alt="${star.name}" class="icon-avatar" onerror="this.onerror=null; this.src='${fallbackAvatar}';" loading="lazy">
           </div>
           <div class="icon-name">${star.name}</div>
         `;
         item.addEventListener("click", () => {
           activeActorFilter = (activeActorFilter === star.name) ? null : star.name;
-          document.querySelectorAll(".icon-chip").forEach(el => el.style.opacity = "1");
-          if (activeActorFilter) {
-            item.style.transform = "scale(1.1)";
-          }
+          document.querySelectorAll(".icon-chip").forEach(el => { el.style.opacity = "1"; el.style.transform = ""; });
+          if (activeActorFilter) item.style.transform = "scale(1.1)";
           renderMovies();
           document.getElementById("catalog").scrollIntoView({ behavior: "smooth" });
         });
@@ -1485,7 +1562,7 @@ function renderIcons() {
       }
 
       if (activeActorFilter) {
-        list = list.filter(m => m.actors.some(act => act.toLowerCase().includes(activeActorFilter.toLowerCase())));
+        list = list.filter(m => m.actors.some(act => (typeof act === "string" ? act : act.name).toLowerCase().includes(activeActorFilter.toLowerCase())));
       }
 
       if (searchQuery.trim() !== "") {
@@ -1493,13 +1570,13 @@ function renderIcons() {
         list = list.filter(m => 
           m.title.toLowerCase().includes(q) ||
           m.originalTitle.toLowerCase().includes(q) ||
-          m.actors.some(a => a.toLowerCase().includes(q)) ||
+          m.actors.some(a => (typeof a === "string" ? a : a.name).toLowerCase().includes(q)) ||
           m.hashtags.some(h => h.toLowerCase().includes(q))
         );
       }
 
       if (sortMode === "author") {
-        list.sort((a, b) => b.authorRating - a.authorRating);
+        list.sort((a, b) => (b.authorRating ?? -Infinity) - (a.authorRating ?? -Infinity));
       } else if (sortMode === "kp") {
         list.sort((a, b) => b.kpRating - a.kpRating);
       } else if (sortMode === "imdb") {
@@ -1536,7 +1613,7 @@ function renderIcons() {
           <div class="dvd-info">
             <div>
               <h3 class="dvd-title">${m.title}</h3>
-              <p class="dvd-cast">В ролях: ${m.actors.join(", ")}</p>
+              <p class="dvd-cast">В ролях: ${m.actors.map(a => typeof a === "string" ? a : a.name).join(", ")}</p>
             </div>
             <div class="dvd-tags">
               ${m.hashtags.map(t => `<span class="mini-tag">${t}</span>`).join("")}
@@ -1599,7 +1676,7 @@ function renderIcons() {
         filtered = moodFiltered;
       }
 
-      filtered.sort((a, b) => b.authorRating - a.authorRating);
+      filtered.sort((a, b) => (b.authorRating ?? -Infinity) - (a.authorRating ?? -Infinity));
       return filtered;
     }
 
@@ -1693,69 +1770,12 @@ function renderIcons() {
       document.getElementById("modalRatingKp").innerText = `⭐ ${movie.kpRating} Кинопоиск`;
       document.getElementById("modalRatingImdb").innerText = `🍿 ${movie.imdbRating} IMDb`;
       document.getElementById("modalSynopsis").innerText = movie.synopsis;
-      document.getElementById("modalCast").innerText = movie.actors.join(", ");
-      document.getElementById("modalTrackName").innerText = movie.soundtrack;
+      document.getElementById("modalCast").innerText = movie.actors.map(a => typeof a === "string" ? a : a.name).join(", ");
+      document.getElementById("modalTrackName").innerText = movie.soundtrack || "Не найден автоматически";
       document.getElementById("modalKpLink").href = `https://www.kinopoisk.ru/film/${movie.kinopoiskId}/`;
       modal.classList.add("open");
     }
 
-    function setupRadio() {
-      const playBtn = document.getElementById("radioPlayBtn");
-      const prevBtn = document.getElementById("radioPrevBtn");
-      const nextBtn = document.getElementById("radioNextBtn");
-      const disc = document.getElementById("cdDisc");
-
-      function updateTrackInfo() {
-        const item = playlist[currentTrackIdx];
-        document.getElementById("radioMarquee").innerText = `${item.artist} — ${item.track}`;
-        document.getElementById("radioSub").innerText = `Саундтрек: «${item.movie}»`;
-        audioPlayer.src = item.src;
-        if (isPlaying) {
-          audioPlayer.play().catch(() => {});
-        }
-      }
-
-      updateTrackInfo();
-
-      playBtn.addEventListener("click", () => {
-        if (!isPlaying) {
-          audioPlayer.play().then(() => {
-            isPlaying = true;
-            playBtn.innerText = "⏸ Пауза";
-            disc.classList.add("spinning");
-          }).catch(err => {
-            console.log("Воспроизведение заблокировано:", err);
-            // Если звук заблокирован автоплеем браузера, диск все равно запускает визуализацию
-            isPlaying = true;
-            playBtn.innerText = "⏸ Пауза";
-            disc.classList.add("spinning");
-          });
-        } else {
-          audioPlayer.pause();
-          isPlaying = false;
-          playBtn.innerText = "▶ Старт";
-          disc.classList.remove("spinning");
-        }
-      });
-
-      prevBtn.addEventListener("click", () => {
-        currentTrackIdx = (currentTrackIdx - 1 + playlist.length) % playlist.length;
-        updateTrackInfo();
-        if (isPlaying) audioPlayer.play().catch(() => {});
-      });
-
-      nextBtn.addEventListener("click", () => {
-        currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
-        updateTrackInfo();
-        if (isPlaying) audioPlayer.play().catch(() => {});
-      });
-
-      audioPlayer.addEventListener("ended", () => {
-        currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
-        updateTrackInfo();
-        audioPlayer.play().catch(() => {});
-      });
-    }
   </script>
 </body>
 </html>
