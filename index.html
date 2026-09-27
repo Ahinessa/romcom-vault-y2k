@@ -1522,39 +1522,123 @@ let iconsList = [];
     });
 
 function renderIcons() {
-      const container = document.getElementById("iconsRow");
-      container.innerHTML = "";
+  const container = document.getElementById("iconsRow");
+  container.innerHTML = "";
 
-      const unique = new Map();
-      moviesData.forEach(movie => {
-        (movie.actors || []).forEach(actor => {
-          const name = typeof actor === "string" ? actor : actor.name;
-          const photo = typeof actor === "object" ? actor.photo : null;
-          if (name && !unique.has(name)) unique.set(name, { name, avatar: photo });
-        });
-      });
-      iconsList = [...unique.values()];
+  // Считаем, в скольких фильмах появляется каждый актёр
+  const actorsMap = new Map();
 
-      iconsList.forEach(star => {
-        const item = document.createElement("div");
-        item.className = "icon-chip";
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(star.name)}&background=FF2E93&color=fff&size=150&bold=true`;
-        item.innerHTML = `
-          <div class="icon-avatar-wrap">
-            <img src="${star.avatar || fallbackAvatar}" alt="${star.name}" class="icon-avatar" onerror="this.onerror=null; this.src='${fallbackAvatar}';" loading="lazy">
-          </div>
-          <div class="icon-name">${star.name}</div>
-        `;
-        item.addEventListener("click", () => {
-          activeActorFilter = (activeActorFilter === star.name) ? null : star.name;
-          document.querySelectorAll(".icon-chip").forEach(el => { el.style.opacity = "1"; el.style.transform = ""; });
-          if (activeActorFilter) item.style.transform = "scale(1.1)";
-          renderMovies();
-          document.getElementById("catalog").scrollIntoView({ behavior: "smooth" });
+  moviesData.forEach(movie => {
+    // Только актёры, которых Worker получил из первых позиций cast
+    const actors = Array.isArray(movie.actors)
+      ? movie.actors.slice(0, 5)
+      : [];
+
+    actors.forEach(actor => {
+      const name = typeof actor === "string"
+        ? actor
+        : actor?.name;
+
+      if (!name) return;
+
+      const key = name.toLowerCase().trim();
+
+      if (!actorsMap.has(key)) {
+        actorsMap.set(key, {
+          name,
+          photo: typeof actor === "object" ? actor.photo : null,
+          movies: 0,
+          movieTitles: []
         });
-        container.appendChild(item);
+      }
+
+      const item = actorsMap.get(key);
+
+      item.movies++;
+
+      if (!item.movieTitles.includes(movie.title)) {
+        item.movieTitles.push(movie.title);
+      }
+
+      // Если раньше фотографии не было, а сейчас появилась —
+      // сохраняем её
+      if (!item.photo && typeof actor === "object" && actor.photo) {
+        item.photo = actor.photo;
+      }
+    });
+  });
+
+  // Показываем только актёров,
+  // которые встречаются минимум в 3 фильмах
+  iconsList = [...actorsMap.values()]
+    .filter(actor => actor.movies >= 3)
+    .sort((a, b) => {
+      // сначала по количеству фильмов
+      if (b.movies !== a.movies) {
+        return b.movies - a.movies;
+      }
+
+      // затем по имени
+      return a.name.localeCompare(b.name);
+    });
+
+  iconsList.forEach(star => {
+    const item = document.createElement("div");
+    item.className = "icon-chip";
+
+    const fallbackAvatar =
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(star.name)}&background=FF2E93&color=fff&size=150&bold=true`;
+
+    item.innerHTML = `
+      <div class="icon-avatar-wrap">
+        <img
+          src="${star.photo || fallbackAvatar}"
+          alt="${star.name}"
+          class="icon-avatar"
+          onerror="this.onerror=null; this.src='${fallbackAvatar}';"
+          loading="lazy"
+        >
+      </div>
+
+      <div class="icon-name">
+        ${star.name}
+      </div>
+
+      <div style="
+        font-size: 0.7rem;
+        color: #888;
+        margin-top: 3px;
+        font-weight: 700;
+      ">
+        ${star.movies} фильма
+      </div>
+    `;
+
+    item.addEventListener("click", () => {
+      activeActorFilter =
+        activeActorFilter === star.name
+          ? null
+          : star.name;
+
+      document.querySelectorAll(".icon-chip").forEach(el => {
+        el.style.opacity = "1";
+        el.style.transform = "";
       });
-    }
+
+      if (activeActorFilter) {
+        item.style.transform = "scale(1.1)";
+      }
+
+      renderMovies();
+
+      document
+        .getElementById("catalog")
+        .scrollIntoView({ behavior: "smooth" });
+    });
+
+    container.appendChild(item);
+  });
+}
 
     function renderMovies() {
       const grid = document.getElementById("moviesGrid");
