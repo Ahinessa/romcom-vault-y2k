@@ -1329,7 +1329,7 @@ let iconsList = [];
 
     async function fetchAutoData() {
       try {
-        const response = await fetch(`${AUTO_DATA_API}/catalog`, {
+        const response = await fetch(`${API_URL}/api/catalog`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
