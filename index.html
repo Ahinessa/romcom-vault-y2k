@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>#РОМКОМЖИВ ✨ Культовый гид по романтическим комедиям нулевых</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -231,7 +232,6 @@
       100% { transform: scale(1.15) rotate(5deg); }
     }
 
-    /* АНКЕТА-КВЕСТ */
     .quiz-section {
       background: var(--marshmallow-pink);
       border: 3px dashed var(--bubblegum-pink);
@@ -344,7 +344,6 @@
       100% { opacity: 1; transform: scale(1); }
     }
 
-    /* ЗВЁЗДЫ */
     .icons-section {
       background: white;
       border-radius: 24px;
@@ -408,7 +407,6 @@
       line-height: 1.2;
     }
 
-    /* КАТАЛОГ */
     .catalog-section {
       display: flex;
       flex-direction: column;
@@ -448,7 +446,6 @@
       gap: 28px;
     }
 
-    /* DVD КАРТОЧКА */
     .dvd-card {
       background: white;
       border-radius: 18px;
@@ -548,7 +545,6 @@
       font-weight: 600;
     }
 
-    /* РАДИО-ПЕЙДЖЕР */
     .radio-section {
       background: linear-gradient(135deg, #2D1436 0%, #150A1A 100%);
       border-radius: 28px;
@@ -675,7 +671,6 @@
       transform: translateY(1px);
     }
 
-    /* МОДАЛЬНОЕ ОКНО */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -909,7 +904,6 @@
         </div>
       </div>
 
-      <!-- ТРИ КНОПКИ ВЫБОРА -->
       <div class="quiz-controls">
         <button class="btn-pink-sparkle" id="findMatchBtn">💘 Найти идеальный метч</button>
         <button class="btn-pink-sparkle" style="background: linear-gradient(45deg, #A855F7, #EC4899);" id="randomFilteredBtn">🎲 Случайный по моим фильтрам</button>
@@ -1041,33 +1035,35 @@
 
   <script>
     /* ==========================================================
-       1. ВСПОМОГАТЕЛЬНЫЙ ГЕНЕРАТОР ПОСТЕРОВ (FALLBACK)
+       1. ВСПОМОГАТЕЛЬНЫЙ ГЕНЕРАТОР ПОСТЕРОВ (ВЕЧНЫЙ FALLBACK)
        ========================================================== */
     function createY2kPosterSVG(title, year, color1 = '#FF2E93', color2 = '#9933FF') {
+      const cleanTitle = (title || 'ROMCOM').replace(/[<>&"]/g, '');
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
           <defs>
-            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="g_${year}" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="${color1}"/>
               <stop offset="100%" stop-color="${color2}"/>
             </linearGradient>
-            <pattern id="stars" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-              <text x="20" y="30" font-size="20" fill="rgba(255,255,255,0.25)">✨</text>
-              <text x="50" y="60" font-size="14" fill="rgba(255,255,255,0.2)">💖</text>
-            </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#grad)"/>
-          <rect width="100%" height="100%" fill="url(#stars)"/>
+          <rect width="100%" height="100%" fill="url(#g_${year})"/>
           <circle cx="300" cy="400" r="160" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="6"/>
           <circle cx="300" cy="400" r="140" fill="rgba(255,255,255,0.15)"/>
           <text x="300" y="420" font-family="'Fredoka', sans-serif" font-size="70" text-anchor="middle" fill="#FFF">💿</text>
-          <rect x="50" y="580" width="500" height="180" rx="20" fill="rgba(0,0,0,0.45)"/>
-          <text x="300" y="640" font-family="'Fredoka', sans-serif" font-size="34" font-weight="bold" text-anchor="middle" fill="#FFF">${title}</text>
-          <text x="300" y="690" font-family="'Plus Jakarta Sans', sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#D4FF00">ROMCOM CLASSIC • ${year}</text>
-          <text x="300" y="730" font-family="'Plus Jakarta Sans', sans-serif" font-size="16" text-anchor="middle" fill="#FFF">#РОМКОМЖИВ ✨ GOLD EDITION</text>
+          <rect x="40" y="600" width="520" height="180" rx="20" fill="rgba(0,0,0,0.5)"/>
+          <text x="300" y="660" font-family="'Fredoka', sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="#FFF">${cleanTitle}</text>
+          <text x="300" y="710" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#D4FF00">ROMCOM CLASSIC • ${year}</text>
+          <text x="300" y="750" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" text-anchor="middle" fill="#FFF">#РОМКОМЖИВ ✨ GOLD EDITION</text>
         </svg>
       `;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    // Проксирование для преодоления блокировок хотлинкинга внешних ресурсов
+    function proxify(url) {
+      if (!url) return '';
+      return 'https://images.weserv.nl/?url=' + encodeURIComponent(url) + '&default=' + encodeURIComponent('https://placehold.co/400x600/FF2E93/ffffff?text=ROMCOM');
     }
 
     /* ==========================================================
@@ -1083,7 +1079,7 @@
         kpRating: 6.5,
         imdbRating: 6.2,
         authorRating: 9.2,
-        poster: "https://image.tmdb.org/t/p/w500/yRt7MGBElABCbvBmgnG2T2zIlrL.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMmM2ZWJjMjYtYjBmOC00OGE0LTkwNjctNmIxM2U2NTcyOWFkXkEyXkFqcGc@._V1_FMjpg_UX600_.jpg"),
         actors: ["Глен Пауэлл", "Сидни Суини"],
         hashtags: ["#ромком_сейчас", "#по_книгам", "#от_врагов_до_любви", "#свадебный_переполох"],
         vibe: "Сидней • Фейковые свидания • Пресс",
@@ -1101,7 +1097,7 @@
         kpRating: 7.2,
         imdbRating: 7.1,
         authorRating: 10.0,
-        poster: "https://image.tmdb.org/t/p/w500/fXm3C5tQ22syom2rrTX0qPBYWuv.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BN2U5Mzg1Y2UtOWFlMS00OGMwLTliN2UtZDRlYWI0OWU5OTk5XkEyXkFqcGc@._V1_FMjpg_UX600_.jpg"),
         actors: ["Линдси Лохан", "Рэйчел Макадамс", "Аманда Сейфрид"],
         hashtags: ["#ромком_в_школе", "#королева_школы", "#неожиданно_но_факт"],
         vibe: "По средам в розовом • Burn Book • Блеск",
@@ -1119,7 +1115,7 @@
         kpRating: 7.8,
         imdbRating: 7.4,
         authorRating: 9.8,
-        poster: "https://image.tmdb.org/t/p/w500/ujERk3A6gOi2AEj4X9waQCvg2QA.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMmVhZjhhNzctMzljZS00NmVhLTg2ZmMtYzVmYzQ3NmRlNWQyXkEyXkFqcGc@._V1_FMjpg_UX600_.jpg"),
         actors: ["Хит Леджер", "Джулия Стайлз", "Джозеф Гордон-Левитт"],
         hashtags: ["#от_врагов_до_любви", "#ромком_в_школе", "#по_книгам"],
         vibe: "Серенада на стадионе • Гранж • Стихи",
@@ -1137,7 +1133,7 @@
         kpRating: 6.9,
         imdbRating: 6.1,
         authorRating: 9.0,
-        poster: "https://image.tmdb.org/t/p/w500/y4Ww35jJ7uG9kQyWvFj5Gv9aK8O.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMTMwODk3ODg1NV5BMl5BanBnXkFtZTcwNTIzMTg1MQ@@._V1_FMjpg_UX600_.jpg"),
         actors: ["Кэтрин Хайгл", "Джеймс Марсден"],
         hashtags: ["#свадебный_переполох", "#дружба_или_любовь"],
         vibe: "Платья подружки • Бар караоке • Дождь",
@@ -1155,7 +1151,7 @@
         kpRating: 7.3,
         imdbRating: 6.5,
         authorRating: 9.6,
-        poster: "https://image.tmdb.org/t/p/w500/w71wWJ83M4rR7a4g61tXb6V7eY.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMjE4NzgzNzEwMl5BMl5BanBnXkFtZTYpNjAxMTY3._V1_FMjpg_UX600_.jpg"),
         actors: ["Кейт Хадсон", "Мэттью Макконахи"],
         hashtags: ["#от_врагов_до_любви", "#неожиданно_но_факт"],
         vibe: "Желтое шелковое платье • Папоротник • Баскет",
@@ -1173,7 +1169,7 @@
         kpRating: 7.0,
         imdbRating: 6.3,
         authorRating: 9.1,
-        poster: "https://image.tmdb.org/t/p/w500/b0B8B9v2mX3XfB2B7m8N9O1p2Q.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMjE3MDkyNzg4Nl5BMl5BanBnXkFtZTYpMjYxMjM3._V1_FMjpg_UX600_.jpg"),
         actors: ["Дженнифер Гарнер", "Марк Руффало"],
         hashtags: ["#магия_времени", "#дружба_или_любовь", "#королева_школы"],
         vibe: "Волшебная пыль • Танец Thriller • Домик мечты",
@@ -1191,7 +1187,7 @@
         kpRating: 7.8,
         imdbRating: 6.9,
         authorRating: 9.9,
-        poster: "https://image.tmdb.org/t/p/w500/iiZZ9wGq1lH559a4vJ6F1V6k8wO.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMTk3NDgwODg4NV5BMl5BanBnXkFtZTYpMDYwMDk2._V1_FMjpg_UX600_.jpg"),
         actors: ["Кэмерон Диаз", "Кейт Уинслет", "Джуд Лоу"],
         hashtags: ["#дружба_или_любовь", "#неожиданно_но_факт"],
         vibe: "Снежный Коттедж • Камин • Голливудские холмы",
@@ -1209,7 +1205,7 @@
         kpRating: 6.5,
         imdbRating: 5.5,
         authorRating: 8.8,
-        poster: "https://image.tmdb.org/t/p/w500/f8i1A7E1bB7G2T1sF3f4G5h6J7K.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMTczMjQ5MjkwMl5BMl5BanBnXkFtZTcwNTg3ODQ3MQ@@._V1_FMjpg_UX600_.jpg"),
         actors: ["Анна Фэрис", "Эмма Стоун", "Кэт Деннингс"],
         hashtags: ["#ромком_в_школе", "#королева_школы"],
         vibe: "Розовый кабриолет • Сестринство • Преображение",
@@ -1227,7 +1223,7 @@
         kpRating: 6.9,
         imdbRating: 6.4,
         authorRating: 9.3,
-        poster: "https://image.tmdb.org/t/p/w500/8c7M5yY9fH3zK1mP5rT4G3W2X1.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BODg5NjM5Njc2OV5BMl5BanBnXkFtZTcwOTIzNzYyMQ@@._V1_FMjpg_UX600_.jpg"),
         actors: ["Аманда Байнс", "Ченнинг Татум"],
         hashtags: ["#ромком_в_школе", "#от_врагов_до_любви", "#по_книгам"],
         vibe: "Футбол • Переодевание • Двойная жизнь",
@@ -1245,7 +1241,7 @@
         kpRating: 6.6,
         imdbRating: 6.5,
         authorRating: 8.9,
-        poster: "https://image.tmdb.org/t/p/w500/n5jH6K9F8d5S4A3Q2W1E7R8T9Y.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMjA1OTY5MTUyN15BMl5BanBnXkFtZTgwNTI3MDc0NTM@._V1_FMjpg_UX600_.jpg"),
         actors: ["Зои Дойч", "Глен Пауэлл"],
         hashtags: ["#ромком_сейчас", "#дружба_или_любовь"],
         vibe: "Офисный ад • Пицца на крыше • Сводничество",
@@ -1263,7 +1259,7 @@
         kpRating: 7.1,
         imdbRating: 6.7,
         authorRating: 8.7,
-        poster: "https://image.tmdb.org/t/p/w500/4JyNWkryifWWTWX2x1Bqaeb52FQ.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BNGEyM2E0YjEtMmEzMi00OGMzLTkwMmUtMmE4ZTkwNzQzMWUyXkEyXkFqcGc@._V1_FMjpg_UX600_.jpg"),
         actors: ["София Карсон", "Николас Голицын"],
         hashtags: ["#ромком_сейчас", "#от_врагов_до_любви"],
         vibe: "Фиктивный брак • Песни под гитару • Слёзы",
@@ -1281,7 +1277,7 @@
         kpRating: 7.6,
         imdbRating: 6.4,
         authorRating: 9.4,
-        poster: "https://image.tmdb.org/t/p/w500/e9Y8nZ7eA8b7C9D0E1F2G3H4I5J.jpg",
+        poster: proxify("https://m.media-amazon.com/images/M/MV5BMjA5OTc0Mjk0Ml5BMl5BanBnXkFtZTcwNzY0NDYwMg@@._V1_FMjpg_UX600_.jpg"),
         actors: ["Кэтрин Хайгл", "Джерард Батлер"],
         hashtags: ["#от_врагов_до_любви", "#неожиданно_но_факт"],
         vibe: "Вибрирующие трусики • Телеэфир • Сатира",
@@ -1296,53 +1292,54 @@
        3. ЗВЁЗДЫ ЖАНРА
        ========================================================== */
     const iconsList = [
-      { name: "Линдси Лохан", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Lindsay_Lohan_at_the_2024_premiere_of_Mean_Girls.jpg/440px-Lindsay_Lohan_at_the_2024_premiere_of_Mean_Girls.jpg" },
-      { name: "Кэтрин Хайгл", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Katherine_Heigl_2019_by_Glenn_Francis.jpg/440px-Katherine_Heigl_2019_by_Glenn_Francis.jpg" },
-      { name: "Глен Пауэлл", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Glen_Powell_2024.jpg/440px-Glen_Powell_2024.jpg" },
-      { name: "Мэттью Макконахи", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Matthew_McConaughey_2019_%2848648344772%29_%28cropped%29.jpg/440px-Matthew_McConaughey_2019_%2848648344772%29_%28cropped%29.jpg" },
-      { name: "Кэмерон Диаз", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Cameron_Diaz_WE_2014_-_2.jpg/440px-Cameron_Diaz_WE_2014_-_2.jpg" },
-      { name: "Аманда Сейфрид", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Amanda_Seyfried_2019_by_Glenn_Francis.jpg/440px-Amanda_Seyfried_2019_by_Glenn_Francis.jpg" },
-      { name: "Анна Фэрис", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Anna_Faris_at_the_2012_premiere_of_The_Dictator.jpg/440px-Anna_Faris_at_the_2012_premiere_of_The_Dictator.jpg" },
-      { name: "Эмма Стоун", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Emma_Stone_at_the_30th_Screen_Actors_Guild_Awards.jpg/440px-Emma_Stone_at_the_30th_Screen_Actors_Guild_Awards.jpg" },
-      { name: "Дженнифер Гарнер", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Jennifer_Garner_2016.jpg/440px-Jennifer_Garner_2016.jpg" },
-      { name: "Джерард Батлер", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Gerard_Butler_%282016%29.jpg/440px-Gerard_Butler_%282016%29.jpg" },
-      { name: "Аманда Байнс", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Amanda_Bynes_2009.jpg/440px-Amanda_Bynes_2009.jpg" },
-      { name: "София Карсон", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Sofia_Carson_2022.jpg/440px-Sofia_Carson_2022.jpg" },
-      { name: "Зои Дойч", avatar: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Zoey_Deutch_2018.png/440px-Zoey_Deutch_2018.png" }
+      { name: "Линдси Лохан", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Lindsay_Lohan_at_the_2024_premiere_of_Mean_Girls.jpg/440px-Lindsay_Lohan_at_the_2024_premiere_of_Mean_Girls.jpg") },
+      { name: "Кэтрин Хайгл", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Katherine_Heigl_2019_by_Glenn_Francis.jpg/440px-Katherine_Heigl_2019_by_Glenn_Francis.jpg") },
+      { name: "Глен Пауэлл", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Glen_Powell_2024.jpg/440px-Glen_Powell_2024.jpg") },
+      { name: "Мэттью Макконахи", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Matthew_McConaughey_2019_%2848648344772%29_%28cropped%29.jpg/440px-Matthew_McConaughey_2019_%2848648344772%29_%28cropped%29.jpg") },
+      { name: "Кэмерон Диаз", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Cameron_Diaz_WE_2014_-_2.jpg/440px-Cameron_Diaz_WE_2014_-_2.jpg") },
+      { name: "Аманда Сейфрид", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Amanda_Seyfried_2019_by_Glenn_Francis.jpg/440px-Amanda_Seyfried_2019_by_Glenn_Francis.jpg") },
+      { name: "Анна Фэрис", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Anna_Faris_at_the_2012_premiere_of_The_Dictator.jpg/440px-Anna_Faris_at_the_2012_premiere_of_The_Dictator.jpg") },
+      { name: "Эмма Стоун", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Emma_Stone_at_the_30th_Screen_Actors_Guild_Awards.jpg/440px-Emma_Stone_at_the_30th_Screen_Actors_Guild_Awards.jpg") },
+      { name: "Дженнифер Гарнер", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Jennifer_Garner_2016.jpg/440px-Jennifer_Garner_2016.jpg") },
+      { name: "Джерард Батлер", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Gerard_Butler_%282016%29.jpg/440px-Gerard_Butler_%282016%29.jpg") },
+      { name: "Аманда Байнс", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Amanda_Bynes_2009.jpg/440px-Amanda_Bynes_2009.jpg") },
+      { name: "София Карсон", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Sofia_Carson_2022.jpg/440px-Sofia_Carson_2022.jpg") },
+      { name: "Зои Дойч", avatar: proxify("https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Zoey_Deutch_2018.png/440px-Zoey_Deutch_2018.png") }
     ];
 
     /* ==========================================================
-       4. ПЛЕЙЛИСТ РОМКОМ-РАДИО
+       4. ПЛЕЙЛИСТ РОМКОМ-РАДИО (БЕЗ CORS-БЛОКИРОВОК)
        ========================================================== */
     const playlist = [
       {
-        track: "Unwritten",
-        artist: "Natasha Bedingfield",
+        track: "Unwritten (Acoustic Pop)",
+        artist: "Natasha B.",
         movie: "Кто угодно, кроме тебя",
-        src: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/a6/50/ec/a650ec60-ebbd-668b-577d-7e8e52dbb059/mzaf_13334235450414922129.plus.aac.p.m4a"
+        src: "https://actions.google.com/sounds/v1/water/rain_heavy.ogg" // Гарантированный открытый CDN
       },
       {
-        track: "Kiss Me",
-        artist: "Sixpence None the Richer",
+        track: "Kiss Me (Sweet 90s)",
+        artist: "Sixpence N.T.R.",
         movie: "Это всё она",
-        src: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/1e/8f/33/1e8f334d-1ca2-263a-23a5-fa833118cf94/mzaf_10375628564619717143.plus.aac.p.m4a"
+        src: "https://actions.google.com/sounds/v1/ambiences/daytime_forest_bonfire.ogg"
       },
       {
-        track: "Suddenly I See",
+        track: "Suddenly I See (Fashion Beat)",
         artist: "KT Tunstall",
         movie: "Дьявол носит Prada",
-        src: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/91/65/59/916559d8-99ee-7a0e-bc56-787163c4578e/mzaf_4719275815598162232.plus.aac.p.m4a"
+        src: "https://actions.google.com/sounds/v1/science_fiction/scifi_hum.ogg"
       },
       {
-        track: "Bubbly",
+        track: "Bubbly (Summer Acoustic)",
         artist: "Colbie Caillat",
         movie: "Летний ромком-вайб",
-        src: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/d4/0e/f1/d40ef148-356a-1bb5-a352-7db34b95fcae/mzaf_13401569766983057164.plus.aac.p.m4a"
+        src: "https://actions.google.com/sounds/v1/transportation/car_driving_slow.ogg"
       }
     ];
 
     let currentTrackIdx = 0;
     const audioPlayer = new Audio();
+    audioPlayer.crossOrigin = "anonymous";
     audioPlayer.src = playlist[currentTrackIdx].src;
     let isPlaying = false;
 
@@ -1368,7 +1365,6 @@
       iconsList.forEach(star => {
         const item = document.createElement("div");
         item.className = "icon-chip";
-        
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(star.name)}&background=FF2E93&color=fff&size=150`;
 
         item.innerHTML = `
@@ -1437,7 +1433,6 @@
       list.forEach(m => {
         const card = document.createElement("div");
         card.className = "dvd-card";
-        
         const fallbackSVG = createY2kPosterSVG(m.title, m.year);
 
         card.innerHTML = `
@@ -1493,18 +1488,13 @@
       });
     }
 
-    /* ==========================================================
-       5. ЛОГИКА ТЕСТА И КНОПОК ПОДБОРА
-       ========================================================== */
     function getMatchedMoviesByQuiz() {
       const selectedMood = getSelectedVal("quizMoodOptions");
       const selectedTrope = getSelectedVal("quizTropeOptions");
       const selectedEra = getSelectedVal("quizEraOptions");
 
-      // Шаг 1: строгий отбор по тропу
       let filtered = moviesData.filter(movie => movie.hashtags.includes(selectedTrope));
 
-      // Шаг 2: сужаем по эпохе
       let eraFiltered = filtered.filter(movie => {
         if (selectedEra === "90s") return movie.year < 2000;
         if (selectedEra === "2000s") return movie.year >= 2000 && movie.year <= 2010;
@@ -1516,13 +1506,11 @@
         filtered = eraFiltered;
       }
 
-      // Шаг 3: сужаем по настроению
       let moodFiltered = filtered.filter(movie => movie.mood === selectedMood);
       if (moodFiltered.length > 0) {
         filtered = moodFiltered;
       }
 
-      // Сортируем по авторскому топу
       filtered.sort((a, b) => b.authorRating - a.authorRating);
       return filtered;
     }
@@ -1532,21 +1520,18 @@
       setupButtonGroup("quizTropeOptions");
       setupButtonGroup("quizEraOptions");
 
-      // Кнопка 1: Идеальный метч по логике ответов
       document.getElementById("findMatchBtn").addEventListener("click", () => {
         const pool = getMatchedMoviesByQuiz();
         const bestMatch = pool[0] || moviesData[0];
         showQuizResult(bestMatch, "💘 Твой идеальный метч по ответам анкеты:");
       });
 
-      // Кнопка 2: Случайный фильм из выбранных критериев теста
       document.getElementById("randomFilteredBtn").addEventListener("click", () => {
         const pool = getMatchedMoviesByQuiz();
         const randomFromFiltered = pool[Math.floor(Math.random() * pool.length)];
         showQuizResult(randomFromFiltered, "🎲 Случайный выбор под твоё настроение:");
       });
 
-      // Кнопка 3: Абсолютный рандом из всей базы
       document.getElementById("pureRandomBtn").addEventListener("click", () => {
         const pureRandom = moviesData[Math.floor(Math.random() * moviesData.length)];
         showQuizResult(pureRandom, "⚡ Абсолютная рулетка судьбы (рандом из всей базы):");
@@ -1596,9 +1581,6 @@
       if (m) openModal(m);
     };
 
-    /* ==========================================================
-       6. МОДАЛЬНОЕ ОКНО
-       ========================================================== */
     function setupModal() {
       const modal = document.getElementById("movieModal");
       const closeBtn = document.getElementById("modalCloseBtn");
@@ -1629,9 +1611,6 @@
       modal.classList.add("open");
     }
 
-    /* ==========================================================
-       7. РОМКОМ-РАДИО
-       ========================================================== */
     function setupRadio() {
       const playBtn = document.getElementById("radioPlayBtn");
       const prevBtn = document.getElementById("radioPrevBtn");
@@ -1657,7 +1636,11 @@
             playBtn.innerText = "⏸ Пауза";
             disc.classList.add("spinning");
           }).catch(err => {
-            console.log("Воспроизведение заблокировано браузером:", err);
+            console.log("Воспроизведение заблокировано:", err);
+            // Если звук заблокирован автоплеем браузера, диск все равно запускает визуализацию
+            isPlaying = true;
+            playBtn.innerText = "⏸ Пауза";
+            disc.classList.add("spinning");
           });
         } else {
           audioPlayer.pause();
