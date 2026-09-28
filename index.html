@@ -359,11 +359,35 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .stars-header-left {
+    .stars-section-header {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 18px;
+      width: 100%;
+    }
+    .stars-header-right {
+      grid-column: 2 / 4;
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 14px;
+      min-width: 0;
+    }
+    .stars-header-right .stars-reset-btn {
+      margin-left: 4px;
+      flex: 0 0 auto;
+    }
+    @media (max-width: 760px) {
+      .stars-section-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .stars-header-right {
+        width: 100%;
+        justify-content: space-between;
+      }
     }
     .stars-reset-btn {
       border: 2px solid var(--lavender);
@@ -960,12 +984,12 @@
 
     <!-- ЗВЁЗДЫ ЖАНРА -->
     <section class="icons-section" id="stars">
-      <div class="section-header">
-        <div class="stars-header-left">
+      <div class="section-header stars-section-header">
+        <h2 class="section-title">👑 #Звезды_Жанра (#ROMCOM_ICONS)</h2>
+        <div class="stars-header-right">
+          <span style="font-size: 0.85rem; color: #888;">Кликни на икону, чтобы отфильтровать фильмы</span>
           <button class="stars-reset-btn" id="resetActorFilterBtn" type="button">✕ Сбросить фильтр</button>
-          <h2 class="section-title">👑 #Звезды_Жанра (#ROMCOM_ICONS)</h2>
         </div>
-        <span style="font-size: 0.85rem; color: #888;">Кликни на икону, чтобы отфильтровать фильмы</span>
       </div>
       <div class="icons-scroll-row" id="iconsRow"></div>
     </section>
