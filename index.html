@@ -2863,7 +2863,7 @@ let iconsList = [];
       const sub = document.getElementById("radioSub");
       if (!playlist.length) {
         marquee.innerText = "Саундтрек пока не найден";
-        sub.innerText = "Автоматический поиск не вернул доступный preview";
+        sub.innerText = "Саундтрек найден, но preview пока не получен";
         playBtn.disabled = true;
         prevBtn.disabled = true;
         nextBtn.disabled = true;
@@ -3001,15 +3001,38 @@ function renderIcons() {
       const container = document.getElementById("iconsRow");
       container.innerHTML = "";
 
-      const unique = new Map();
+      // Считаем, сколько раз актёр встречается в каталоге.
+      // Берём актёров, которых TMDB вернул в топ-10 состава каждого фильма.
+      const counts = new Map();
+
       moviesData.forEach(movie => {
+        const seenInThisMovie = new Set();
         (movie.actors || []).forEach(actor => {
           const name = typeof actor === "string" ? actor : actor.name;
-          const photo = typeof actor === "object" ? actor.photo : null;
-          if (name && !unique.has(name)) unique.set(name, { name, avatar: photo });
+          if (!name) return;
+
+          const key = name.trim().toLowerCase().replace(/\s+/g, " ");
+          if (seenInThisMovie.has(key)) return;
+          seenInThisMovie.add(key);
+
+          const existing = counts.get(key);
+          if (existing) {
+            existing.count += 1;
+            if (!existing.avatar && typeof actor === "object" && actor.photo) existing.avatar = actor.photo;
+          } else {
+            counts.set(key, {
+              name: name.trim(),
+              avatar: typeof actor === "object" ? actor.photo : null,
+              count: 1
+            });
+          }
         });
       });
-      iconsList = [...unique.values()];
+
+      // Показываем именно 12 самых часто встречающихся актёров.
+      iconsList = [...counts.values()]
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ru"))
+        .slice(0, 12);
 
       iconsList.forEach(star => {
         const item = document.createElement("div");
@@ -3020,6 +3043,7 @@ function renderIcons() {
             <img src="${star.avatar || fallbackAvatar}" alt="${star.name}" class="icon-avatar" onerror="this.onerror=null; this.src='${fallbackAvatar}';" loading="lazy">
           </div>
           <div class="icon-name">${star.name}</div>
+          <div style="font-size:.72rem;color:#8C6A88;margin-top:2px;">${star.count} фильм${star.count === 1 ? "" : (star.count < 5 ? "а" : "ов")}</div>
         `;
         item.addEventListener("click", () => {
           activeActorFilter = (activeActorFilter === star.name) ? null : star.name;
