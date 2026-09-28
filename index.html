@@ -3105,8 +3105,10 @@ function renderIcons() {
         });
       });
 
-      // Показываем всех найденных актёров, сортируя по числу фильмов.
+      // Показываем только звёзд, которые встречаются БОЛЕЕ чем в двух фильмах.
+      // То есть минимум в 3 фильмах каталога.
       iconsList = [...counts.values()]
+        .filter(star => star.count >= 2)
         .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ru"));
 
       iconsList.forEach(star => {
