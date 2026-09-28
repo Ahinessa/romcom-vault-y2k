@@ -359,6 +359,32 @@
       flex-wrap: wrap;
       gap: 10px;
     }
+    .stars-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .stars-reset-btn {
+      border: 2px solid var(--lavender);
+      background: #fff;
+      color: #6f4b78;
+      border-radius: 999px;
+      padding: 8px 13px;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s, color 0.2s, opacity 0.2s;
+    }
+    .stars-reset-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: #f6efff;
+    }
+    .stars-reset-btn:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
     .section-title {
       font-size: 1.8rem;
       color: var(--bubblegum-pink);
@@ -935,7 +961,10 @@
     <!-- ЗВЁЗДЫ ЖАНРА -->
     <section class="icons-section" id="stars">
       <div class="section-header">
-        <h2 class="section-title">👑 #Звезды_Жанра (#ROMCOM_ICONS)</h2>
+        <div class="stars-header-left">
+          <button class="stars-reset-btn" id="resetActorFilterBtn" type="button">✕ Сбросить фильтр</button>
+          <h2 class="section-title">👑 #Звезды_Жанра (#ROMCOM_ICONS)</h2>
+        </div>
         <span style="font-size: 0.85rem; color: #888;">Кликни на икону, чтобы отфильтровать фильмы</span>
       </div>
       <div class="icons-scroll-row" id="iconsRow"></div>
@@ -2825,6 +2854,10 @@ let iconsList = [];
           if (Array.isArray(auto.actors) && auto.actors.length) movie.actors = auto.actors;
           if (auto.overview) movie.synopsis = auto.overview;
           if (auto.originalTitle) movie.originalTitle = auto.originalTitle;
+          if (auto.kinopoiskId) movie.kinopoiskId = auto.kinopoiskId;
+          if (auto.kpRating != null && Number(auto.kpRating) > 0) movie.kpRating = Number(auto.kpRating);
+          if (auto.imdbRating != null && Number(auto.imdbRating) > 0) movie.imdbRating = Number(auto.imdbRating);
+          if (auto.autoLabel) movie.vibe = auto.autoLabel;
           if (Array.isArray(auto.soundtrackTracks)) movie.soundtrackTracks = auto.soundtrackTracks;
           if (auto.soundtrack?.track) {
             movie.soundtrack = `${auto.soundtrack.artist} — ${auto.soundtrack.track}`;
@@ -2963,6 +2996,11 @@ let iconsList = [];
 
       playBtn.addEventListener("click", () => {
         if (!playlist.length) return;
+        if (moviePreviewAudio) {
+          moviePreviewAudio.pause();
+          moviePreviewAudio = null;
+          document.querySelectorAll('.soundtrack-play').forEach(b => b.textContent = '▶');
+        }
         initAudio();
         if (audioPlayer.paused) {
           if (!audioPlayer.src || !audioPlayer.src.includes(encodeURIComponent(playlist[currentTrackIdx].src))) {
@@ -2995,14 +3033,28 @@ let iconsList = [];
       fetchAutoData();
       setupLiveSearch();
       setupSort();
+
+      const resetActorFilterBtn = document.getElementById("resetActorFilterBtn");
+      resetActorFilterBtn.addEventListener("click", () => {
+        activeActorFilter = null;
+        document.querySelectorAll(".icon-chip").forEach(el => {
+          el.style.opacity = "1";
+          el.style.transform = "";
+        });
+        renderIcons();
+        renderMovies();
+      });
     });
 
 function renderIcons() {
       const container = document.getElementById("iconsRow");
       container.innerHTML = "";
+      const resetBtn = document.getElementById("resetActorFilterBtn");
+      if (resetBtn) resetBtn.disabled = !activeActorFilter;
 
       // Считаем, сколько раз актёр встречается в каталоге.
-      // Берём актёров, которых TMDB вернул в топ-10 состава каждого фильма.
+      // Берём актёров, которых TMDB вернул в состав каждого фильма.
+      // Ограничение количества отображаемых звёзд намеренно отсутствует.
       const counts = new Map();
 
       moviesData.forEach(movie => {
@@ -3029,10 +3081,9 @@ function renderIcons() {
         });
       });
 
-      // Показываем именно 12 самых часто встречающихся актёров.
+      // Показываем всех найденных актёров, сортируя по числу фильмов.
       iconsList = [...counts.values()]
-        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ru"))
-        .slice(0, 12);
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ru"));
 
       iconsList.forEach(star => {
         const item = document.createElement("div");
@@ -3049,11 +3100,23 @@ function renderIcons() {
           activeActorFilter = (activeActorFilter === star.name) ? null : star.name;
           document.querySelectorAll(".icon-chip").forEach(el => { el.style.opacity = "1"; el.style.transform = ""; });
           if (activeActorFilter) item.style.transform = "scale(1.1)";
+          const resetBtn = document.getElementById("resetActorFilterBtn");
+          if (resetBtn) resetBtn.disabled = !activeActorFilter;
           renderMovies();
           document.getElementById("catalog").scrollIntoView({ behavior: "smooth" });
         });
         container.appendChild(item);
       });
+    }
+
+    function formatRating(value) {
+      const n = Number(value);
+      return Number.isFinite(n) && n > 0 ? n.toFixed(1) : "—";
+    }
+
+    function formatAuthorRating(value) {
+      const n = Number(value);
+      return Number.isFinite(n) && n > 0 ? n.toFixed(1) : "—";
     }
 
     function renderMovies() {
@@ -3110,9 +3173,9 @@ function renderIcons() {
             <span class="dvd-spine-label">DVD • ${m.year}</span>
             <img src="${m.poster ? proxify(m.poster) : fallbackSVG}" alt="${m.title}" class="dvd-poster" onerror="this.onerror=null; this.src='${fallbackSVG}';" loading="lazy">
             <div class="dvd-badges">
-              <span class="badge-icon badge-author">💖 ${m.authorRating}</span>
-              <span class="badge-icon badge-kp">⭐ ${m.kpRating}</span>
-              <span class="badge-icon badge-imdb">🍿 ${m.imdbRating}</span>
+              <span class="badge-icon badge-author">💖 ${formatAuthorRating(m.authorRating)}</span>
+              <span class="badge-icon badge-kp">⭐ ${formatRating(m.kpRating)}</span>
+              <span class="badge-icon badge-imdb">🍿 ${formatRating(m.imdbRating)}</span>
             </div>
           </div>
           <div class="dvd-info">
@@ -3264,6 +3327,12 @@ function renderIcons() {
 
     async function playMovieTrack(track, artist, button, statusEl) {
       if (!track || !artist) return;
+
+      // В режиме сайта может звучать только один источник.
+      // Если играет Ромком-Радио — останавливаем его перед preview фильма.
+      if (audioPlayer && !audioPlayer.paused) {
+        audioPlayer.pause();
+      }
       if (moviePreviewAudio) {
         moviePreviewAudio.pause();
         moviePreviewAudio = null;
@@ -3301,7 +3370,7 @@ function renderIcons() {
       if (!tracks.length) {
         list.innerHTML = movie.soundtrack
           ? `<div class="soundtrack-track"><div><div class="soundtrack-track-name">${movie.soundtrack}</div><div class="soundtrack-status">Preview ищется при нажатии ▶</div></div></div>`
-          : '<div class="soundtrack-status">Список песен пока не найден. Проверь Worker и попробуй обновить страницу.</div>';
+          : '<div class="soundtrack-status">Список песен для этого фильма пока не найден.</div>';
         return;
       }
       list.innerHTML = tracks.map((item, index) => {
@@ -3344,10 +3413,10 @@ function renderIcons() {
       document.getElementById("modalTitle").innerText = `${movie.title} (${movie.originalTitle})`;
       document.getElementById("modalVibe").innerText = `✨ ${movie.vibe}`;
       document.getElementById("modalMeta").innerText = `Год: ${movie.year} • Позиция в авторском топе`;
-      document.getElementById("modalRatingAuthor").innerText = `💖 ${movie.authorRating} Выбор Насти`;
-      document.getElementById("modalRatingKp").innerText = `⭐ ${movie.kpRating} Кинопоиск`;
-      document.getElementById("modalRatingImdb").innerText = `🍿 ${movie.imdbRating} IMDb`;
-      document.getElementById("modalSynopsis").innerText = movie.synopsis;
+      document.getElementById("modalRatingAuthor").innerText = `💖 ${formatAuthorRating(movie.authorRating)} Выбор Насти`;
+      document.getElementById("modalRatingKp").innerText = `⭐ ${formatRating(movie.kpRating)} Кинопоиск`;
+      document.getElementById("modalRatingImdb").innerText = `🍿 ${formatRating(movie.imdbRating)} IMDb`;
+      document.getElementById("modalSynopsis").innerText = movie.synopsis || "Описание фильма пока не найдено.";
       document.getElementById("modalCast").innerText = movie.actors.map(a => typeof a === "string" ? a : a.name).join(", ");
       renderMovieSoundtrack(movie);
       document.getElementById("modalKpLink").href = movie.kinopoiskId ? `https://www.kinopoisk.ru/film/${movie.kinopoiskId}/` : `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movie.title)}`;
