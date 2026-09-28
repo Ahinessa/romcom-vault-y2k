@@ -786,6 +786,12 @@
       border-left: 4px solid var(--bubblegum-pink);
       font-size: 0.88rem;
     }
+    .modal-tracks-list { display: flex; flex-direction: column; gap: 7px; }
+    .soundtrack-track { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.7); border-radius:10px; padding:7px 8px; }
+    .soundtrack-play { width:32px; height:32px; border:2px solid #111; border-radius:50%; background:#D4FF00; cursor:pointer; font-weight:800; flex:0 0 auto; }
+    .soundtrack-track-name { font-weight:700; }
+    .soundtrack-artist { color:#6C4468; font-size:.8rem; }
+    .soundtrack-status { color:#8C6A88; font-size:.78rem; }
     .btn-kp-link {
       background: #FF6600;
       color: white;
@@ -1019,7 +1025,8 @@
         </p>
 
         <div class="modal-soundtrack" id="modalSoundtrackBox">
-          🎵 <strong>Главный гимн:</strong> <span id="modalTrackName"></span>
+          <div style="font-weight:800; margin-bottom:8px;">🎵 Саундтрек фильма</div>
+          <div id="modalTracksList" class="modal-tracks-list">Музыка загружается...</div>
         </div>
 
         <a href="#" target="_blank" rel="noopener noreferrer" class="btn-kp-link" id="modalKpLink">
@@ -1087,10 +1094,10 @@
     /* ==========================================================
        АВТОМАТИЧЕСКОЕ ОБОГАЩЕНИЕ ДАННЫХ
        ========================================================== */
-    const AUTO_DATA_API = "/api";
+    const AUTO_DATA_API = "https://romcom-api.alinenokarkhipovastarco.workers.dev/api";
     let autoDataLoaded = false;
 
-    const moviesData = [
+    const baseMovies = [
       {
         id: 1,
         title: "Кто угодно, кроме тебя",
@@ -1308,6 +1315,1467 @@
         mood: "fun"
       }
     ];
+    const extraMovies = [
+  {
+    "id": 13,
+    "title": "Ноттинг Хилл",
+    "originalTitle": "Notting Hill",
+    "year": 1999,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 14,
+    "title": "Дневник Бриджит Джонс",
+    "originalTitle": "Bridget Jones's Diary",
+    "year": 2001,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 15,
+    "title": "Зависнуть в Палм-Спрингс",
+    "originalTitle": "Palm Springs",
+    "year": 2020,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 16,
+    "title": "Замерзшая из Майами",
+    "originalTitle": "New in Town",
+    "year": 2009,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 17,
+    "title": "Привидение",
+    "originalTitle": "Ghost",
+    "year": 1990,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 18,
+    "title": "В поисках Эмили",
+    "originalTitle": "Finding Emily",
+    "year": 2026,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 19,
+    "title": "Прекрасный принц",
+    "originalTitle": "Geek Charming",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 20,
+    "title": "Свадебный год",
+    "originalTitle": "The Wedding Year",
+    "year": 2019,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 21,
+    "title": "Розалин",
+    "originalTitle": "Rosaline",
+    "year": 2022,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 22,
+    "title": "Другая Зои",
+    "originalTitle": "The Other Zoey",
+    "year": 2023,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 23,
+    "title": "Бунтарка",
+    "originalTitle": "Moxie",
+    "year": 2021,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 24,
+    "title": "Будка поцелуев",
+    "originalTitle": "The Kissing Booth",
+    "year": 2018,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 25,
+    "title": "Идеальное свидание",
+    "originalTitle": "The Perfect Date",
+    "year": 2019,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 26,
+    "title": "Сообщения для Изабель",
+    "originalTitle": "Voicemails for Isabelle",
+    "year": 2026,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 27,
+    "title": "Моя чертовски хорошая подруга",
+    "originalTitle": "My Very Good Friend",
+    "year": 2026,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 28,
+    "title": "16 желаний",
+    "originalTitle": "16 Wishes",
+    "year": 2010,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 29,
+    "title": "Отпуск на двоих",
+    "originalTitle": "People We Meet on Vacation",
+    "year": 2026,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 30,
+    "title": "Вкус жизни",
+    "originalTitle": "No Reservations",
+    "year": 2007,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 31,
+    "title": "Выпускной",
+    "originalTitle": "Prom",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 32,
+    "title": "Остров Ним",
+    "originalTitle": "Nim's Island",
+    "year": 2008,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 33,
+    "title": "Эта дурацкая любовь",
+    "originalTitle": "Crazy, Stupid, Love.",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 34,
+    "title": "Банка конфет",
+    "originalTitle": "Candy Jar",
+    "year": 2018,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 35,
+    "title": "Испанский английский",
+    "originalTitle": "Spanglish",
+    "year": 2004,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 36,
+    "title": "В метре друг от друга",
+    "originalTitle": "Five Feet Apart",
+    "year": 2019,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 37,
+    "title": "Мы купили зоопарк",
+    "originalTitle": "We Bought a Zoo",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 38,
+    "title": "Всегда говори «Да»",
+    "originalTitle": "Yes Man",
+    "year": 2008,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 39,
+    "title": "Время между нами",
+    "originalTitle": "Press Play",
+    "year": 2022,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 40,
+    "title": "Сводишь с ума",
+    "originalTitle": "Screw Up",
+    "year": 2025,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 41,
+    "title": "Энтергалактика",
+    "originalTitle": "Entergalactic",
+    "year": 2022,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 42,
+    "title": "Под солнцем Тосканы",
+    "originalTitle": "Under the Tuscan Sun",
+    "year": 2003,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 43,
+    "title": "Список заветных желаний",
+    "originalTitle": "The Bucket List",
+    "year": 2007,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 44,
+    "title": "Идеальное сочетание",
+    "originalTitle": "A Perfect Pairing",
+    "year": 2022,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 45,
+    "title": "Карта совершенных мгновений",
+    "originalTitle": "The Map of Tiny Perfect Things",
+    "year": 2021,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 46,
+    "title": "Простушка",
+    "originalTitle": "The DUFF",
+    "year": 2015,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 47,
+    "title": "Полуночное солнце",
+    "originalTitle": "Midnight Sun",
+    "year": 2018,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 48,
+    "title": "История вечной любви",
+    "originalTitle": "Ever After",
+    "year": 1998,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 49,
+    "title": "Пурпурные сердца",
+    "originalTitle": "Purple Hearts",
+    "year": 2022,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 50,
+    "title": "Мой год в Оксфорде",
+    "originalTitle": "My Oxford Year",
+    "year": 2025,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 51,
+    "title": "Изобретение лжи",
+    "originalTitle": "The Invention of Lying",
+    "year": 2009,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 52,
+    "title": "Свидание с дочерью президента",
+    "originalTitle": "First Daughter",
+    "year": 2004,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 53,
+    "title": "Принцесса льда",
+    "originalTitle": "Ice Princess",
+    "year": 2005,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 54,
+    "title": "Правила съема: Метод Хитча",
+    "originalTitle": "Hitch",
+    "year": 2005,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 55,
+    "title": "Притворись моим парнем",
+    "originalTitle": "20 ans d'écart",
+    "year": 2013,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 56,
+    "title": "Снова ты",
+    "originalTitle": "You Again",
+    "year": 2010,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 57,
+    "title": "Дневники принцессы",
+    "originalTitle": "The Princess Diaries",
+    "year": 2001,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 58,
+    "title": "Папе снова 17",
+    "originalTitle": "17 Again",
+    "year": 2009,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 59,
+    "title": "Добейся успеха",
+    "originalTitle": "Bring It On",
+    "year": 2000,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 60,
+    "title": "Поцелуй на удачу",
+    "originalTitle": "Just My Luck",
+    "year": 2006,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 61,
+    "title": "Времени в обрез",
+    "originalTitle": "Time Cut",
+    "year": 2024,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 62,
+    "title": "Век Адалин",
+    "originalTitle": "The Age of Adaline",
+    "year": 2015,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 63,
+    "title": "Между небом и землей",
+    "originalTitle": "Just Like Heaven",
+    "year": 2005,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 64,
+    "title": "Сколько у тебя?",
+    "originalTitle": "What's Your Number?",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 65,
+    "title": "Нерв",
+    "originalTitle": "Nerve",
+    "year": 2016,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 66,
+    "title": "Пара на праздники",
+    "originalTitle": "Holidate",
+    "year": 2020,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 67,
+    "title": "Сидни Уайт",
+    "originalTitle": "Sydney White",
+    "year": 2007,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 68,
+    "title": "Слишком крута для тебя",
+    "originalTitle": "She's Out of My League",
+    "year": 2010,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 69,
+    "title": "Неспящие в Сиэттле",
+    "originalTitle": "Sleepless in Seattle",
+    "year": 1993,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 70,
+    "title": "Вам письмо",
+    "originalTitle": "You've Got Mail",
+    "year": 1998,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 71,
+    "title": "Полночь в Париже",
+    "originalTitle": "Midnight in Paris",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 72,
+    "title": "Интуиция",
+    "originalTitle": "Serendipity",
+    "year": 2001,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 73,
+    "title": "Нас приняли!",
+    "originalTitle": "Accepted",
+    "year": 2006,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 74,
+    "title": "50 первых поцелуев",
+    "originalTitle": "50 First Dates",
+    "year": 2004,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 75,
+    "title": "Жизнь как она есть",
+    "originalTitle": "Life as We Know It",
+    "year": 2010,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 76,
+    "title": "Письма к Джульетте",
+    "originalTitle": "Letters to Juliet",
+    "year": 2010,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 77,
+    "title": "Большая свадьба",
+    "originalTitle": "The Big Wedding",
+    "year": 2013,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 78,
+    "title": "Секс по дружбе",
+    "originalTitle": "Friends with Benefits",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 79,
+    "title": "Причем тут любовь?",
+    "originalTitle": "What's Love Got to Do with It?",
+    "year": 2022,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 80,
+    "title": "Шпион, который меня кинул",
+    "originalTitle": "The Spy Who Dumped Me",
+    "year": 2018,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 81,
+    "title": "Очень плохие мамочки",
+    "originalTitle": "Bad Moms",
+    "year": 2016,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 82,
+    "title": "Подстава",
+    "originalTitle": "The Switch",
+    "year": 2010,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 83,
+    "title": "Чего хочет девушка",
+    "originalTitle": "What a Girl Wants",
+    "year": 2003,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 84,
+    "title": "Клуб любителей пирогов и картофельных очистков",
+    "originalTitle": "The Guernsey Literary and Potato Peel Pie Society",
+    "year": 2018,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 85,
+    "title": "Шопоголик",
+    "originalTitle": "Confessions of a Shopaholic",
+    "year": 2009,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 86,
+    "title": "Мальчик в девочке",
+    "originalTitle": "It's a Boy Girl Thing",
+    "year": 2006,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 87,
+    "title": "Она — мужчина",
+    "originalTitle": "She's the Man",
+    "year": 2006,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 88,
+    "title": "Пока ты спал",
+    "originalTitle": "While You Were Sleeping",
+    "year": 1995,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 89,
+    "title": "Притворись моей женой",
+    "originalTitle": "Just Go with It",
+    "year": 2011,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 90,
+    "title": "Смешанные",
+    "originalTitle": "Blended",
+    "year": 2014,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 91,
+    "title": "Сезон свадеб",
+    "originalTitle": "Wedding Season",
+    "year": 2022,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 92,
+    "title": "Столик 19",
+    "originalTitle": "Table 19",
+    "year": 2017,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  },
+  {
+    "id": 93,
+    "title": "Однажды в Риме",
+    "originalTitle": "When in Rome",
+    "year": 2010,
+    "kinopoiskId": "",
+    "kpRating": 0,
+    "imdbRating": 0,
+    "authorRating": null,
+    "poster": "",
+    "actors": [],
+    "hashtags": [],
+    "vibe": "Ромком • автоматические данные",
+    "synopsis": "Описание и актёры загружаются автоматически.",
+    "soundtrack": "",
+    "era": "",
+    "mood": "fun"
+  }
+];
+    const moviesData = Array.from(new Map([...baseMovies, ...extraMovies].map(m => [`${m.title}|${m.year}`, m])).values());
 
     /* ==========================================================
        3. ЗВЁЗДЫ ЖАНРА
@@ -1329,23 +2797,35 @@ let iconsList = [];
 
     async function fetchAutoData() {
       try {
-        const response = await fetch(`${AUTO_DATA_API}/catalog`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            movies: moviesData.map(({ title, originalTitle, year, actors }) => ({ title, originalTitle, year, actors }))
-          })
-        });
-        if (!response.ok) throw new Error(`API ${response.status}`);
-        const payload = await response.json();
-        const byId = new Map((payload.movies || []).map(item => [item.sourceTitle + "|" + item.year, item]));
+        const batchSize = 8;
+        const allResults = [];
+
+        for (let i = 0; i < moviesData.length; i += batchSize) {
+          const batch = moviesData.slice(i, i + batchSize);
+          const response = await fetch(`${AUTO_DATA_API}/catalog`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              movies: batch.map(({ title, originalTitle, year, actors }) => ({ title, originalTitle, year, actors }))
+            })
+          });
+          if (!response.ok) throw new Error(`API ${response.status}`);
+          const payload = await response.json();
+          allResults.push(...(payload.movies || []));
+        }
+
+        const byId = new Map(allResults.map(item => [item.sourceTitle + "|" + item.year, item]));
 
         moviesData.forEach(movie => {
-          const auto = byId.get((movie.originalTitle || movie.title) + "|" + movie.year) || byId.get(movie.title + "|" + movie.year);
+          const auto = byId.get((movie.originalTitle || movie.title) + "|" + movie.year)
+            || byId.get(movie.title + "|" + movie.year);
           if (!auto) return;
 
           if (auto.poster) movie.poster = auto.poster;
           if (Array.isArray(auto.actors) && auto.actors.length) movie.actors = auto.actors;
+          if (auto.overview) movie.synopsis = auto.overview;
+          if (auto.originalTitle) movie.originalTitle = auto.originalTitle;
+          if (Array.isArray(auto.soundtrackTracks)) movie.soundtrackTracks = auto.soundtrackTracks;
           if (auto.soundtrack?.track) {
             movie.soundtrack = `${auto.soundtrack.artist} — ${auto.soundtrack.track}`;
             movie.soundtrackData = auto.soundtrack;
@@ -1370,6 +2850,7 @@ let iconsList = [];
         console.warn("Автоматические данные не загрузились. Оставляем исходные данные:", error);
         renderIcons();
         renderMovies();
+        setupRadioRefresh();
       }
     }
 
@@ -1603,7 +3084,7 @@ function renderIcons() {
         card.innerHTML = `
           <div class="dvd-poster-wrap">
             <span class="dvd-spine-label">DVD • ${m.year}</span>
-            <img src="${m.poster}" alt="${m.title}" class="dvd-poster" onerror="this.onerror=null; this.src='${fallbackSVG}';" loading="lazy">
+            <img src="${m.poster ? proxify(m.poster) : fallbackSVG}" alt="${m.title}" class="dvd-poster" onerror="this.onerror=null; this.src='${fallbackSVG}';" loading="lazy">
             <div class="dvd-badges">
               <span class="badge-icon badge-author">💖 ${m.authorRating}</span>
               <span class="badge-icon badge-kp">⭐ ${m.kpRating}</span>
@@ -1749,16 +3230,89 @@ function renderIcons() {
     function setupModal() {
       const modal = document.getElementById("movieModal");
       const closeBtn = document.getElementById("modalCloseBtn");
-      closeBtn.addEventListener("click", () => modal.classList.remove("open"));
+      closeBtn.addEventListener("click", () => { modal.classList.remove("open"); if (moviePreviewAudio) { moviePreviewAudio.pause(); moviePreviewAudio = null; } });
       modal.addEventListener("click", (e) => {
-        if (e.target === modal) modal.classList.remove("open");
+        if (e.target === modal) { modal.classList.remove("open"); if (moviePreviewAudio) { moviePreviewAudio.pause(); moviePreviewAudio = null; } }
+      });
+    }
+
+    let moviePreviewAudio = null;
+
+    async function playMovieTrack(track, artist, button, statusEl) {
+      if (!track || !artist) return;
+      if (moviePreviewAudio) {
+        moviePreviewAudio.pause();
+        moviePreviewAudio = null;
+      }
+      document.querySelectorAll('.soundtrack-play').forEach(b => b.textContent = '▶');
+      if (statusEl) statusEl.textContent = 'Ищу preview…';
+      try {
+        const response = await fetch(`${AUTO_DATA_API}/track-preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ track, artist })
+        });
+        if (!response.ok) throw new Error(`API ${response.status}`);
+        const data = await response.json();
+        if (!data.preview) throw new Error('Preview не найден');
+        moviePreviewAudio = new Audio(data.preview);
+        moviePreviewAudio.addEventListener('ended', () => {
+          if (button) button.textContent = '▶';
+          if (statusEl) statusEl.textContent = '';
+          moviePreviewAudio = null;
+        });
+        await moviePreviewAudio.play();
+        if (button) button.textContent = '⏸';
+        if (statusEl) statusEl.textContent = 'Играет preview';
+      } catch (error) {
+        console.warn('Не удалось получить preview:', error);
+        if (statusEl) statusEl.textContent = 'Preview для этой песни не найден';
+      }
+    }
+
+    function renderMovieSoundtrack(movie) {
+      const list = document.getElementById('modalTracksList');
+      if (!list) return;
+      const tracks = Array.isArray(movie.soundtrackTracks) ? movie.soundtrackTracks.slice(0, 10) : [];
+      if (!tracks.length) {
+        list.innerHTML = movie.soundtrack
+          ? `<div class="soundtrack-track"><div><div class="soundtrack-track-name">${movie.soundtrack}</div><div class="soundtrack-status">Preview ищется при нажатии ▶</div></div></div>`
+          : '<div class="soundtrack-status">Список песен пока не найден. Проверь Worker и попробуй обновить страницу.</div>';
+        return;
+      }
+      list.innerHTML = tracks.map((item, index) => {
+        const safeTrack = String(item.track || '').replace(/[<>&]/g, '');
+        const safeArtist = String(item.artist || '').replace(/[<>&]/g, '');
+        return `<div class="soundtrack-track">
+          <button class="soundtrack-play" data-track-index="${index}">▶</button>
+          <div style="min-width:0; flex:1;">
+            <div class="soundtrack-track-name">${safeTrack}</div>
+            <div class="soundtrack-artist">${safeArtist}</div>
+            <div class="soundtrack-status" data-status-index="${index}"></div>
+          </div>
+        </div>`;
+      }).join('');
+      list.querySelectorAll('.soundtrack-play').forEach(button => {
+        button.addEventListener('click', () => {
+          const index = Number(button.dataset.trackIndex);
+          const item = tracks[index];
+          const status = list.querySelector(`[data-status-index="${index}"]`);
+          if (button.textContent === '⏸' && moviePreviewAudio) {
+            moviePreviewAudio.pause();
+            moviePreviewAudio = null;
+            button.textContent = '▶';
+            if (status) status.textContent = '';
+            return;
+          }
+          playMovieTrack(item.track, item.artist, button, status);
+        });
       });
     }
 
     function openModal(movie) {
       const modal = document.getElementById("movieModal");
       const posterEl = document.getElementById("modalPoster");
-      posterEl.src = movie.poster;
+      posterEl.src = movie.poster ? proxify(movie.poster) : createY2kPosterSVG(movie.title, movie.year);
       posterEl.onerror = () => {
         posterEl.src = createY2kPosterSVG(movie.title, movie.year);
       };
@@ -1771,8 +3325,8 @@ function renderIcons() {
       document.getElementById("modalRatingImdb").innerText = `🍿 ${movie.imdbRating} IMDb`;
       document.getElementById("modalSynopsis").innerText = movie.synopsis;
       document.getElementById("modalCast").innerText = movie.actors.map(a => typeof a === "string" ? a : a.name).join(", ");
-      document.getElementById("modalTrackName").innerText = movie.soundtrack || "Не найден автоматически";
-      document.getElementById("modalKpLink").href = `https://www.kinopoisk.ru/film/${movie.kinopoiskId}/`;
+      renderMovieSoundtrack(movie);
+      document.getElementById("modalKpLink").href = movie.kinopoiskId ? `https://www.kinopoisk.ru/film/${movie.kinopoiskId}/` : `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movie.title)}`;
       modal.classList.add("open");
     }
 
