@@ -932,6 +932,34 @@
       color: #8C6A88;
       font-weight: 600;
     }
+  
+    .mail-tip {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 18px);
+      width: min(520px, calc(100vw - 32px));
+      box-sizing: border-box;
+      padding: 14px 18px;
+      background: #fff7a8;
+      color: #5B3158;
+      border: 2px solid #5B3158;
+      border-radius: 16px;
+      box-shadow: 5px 5px 0 #5B3158;
+      font-size: 0.92rem;
+      line-height: 1.4;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10001;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .mail-tip.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
   </style>
 </head>
 <body>
@@ -1132,9 +1160,13 @@
         Этот проект сделан исключительно на добровольных начинаниях фаната ромкомов с любовью к золотым нулевым 💖. Если твой любимый фильм не попал в список или у тебя есть идея для нового редкого тропа — обязательно пиши мне на почту!
       </p>
       
-      <a href="mailto:erikolskaya.nastya@gmail.com" class="mail-sticker">
-        💌 erikolskaya.nastya@gmail.com
+      <a href="mailto:ahinessa@vk.com?subject=%D1%81%D0%B0%D0%B9%D1%82%20%D1%80%D0%BE%D0%BC%D0%BA%D0%BE%D0%BC%D0%BE%D0%B2" class="mail-sticker" id="mailSticker" title="Совет по отправке письма">
+        💌 ahinessa@vk.com
       </a>
+
+      <div class="mail-tip" id="mailTip" role="status" aria-live="polite">
+        💡 <strong>Совет:</strong> при отправке письма укажите тему <strong>«сайт ромкомов»</strong>, чтобы я понимала причину обращения.
+      </div>
 
       <div style="font-size:0.78rem;color:#8C6A88;">Постеры и данные об актёрах загружаются автоматически через TMDB. Этот продукт использует TMDB API, но не одобрен и не сертифицирован TMDB.</div>
 
@@ -4354,15 +4386,66 @@ let iconsList = [];
           }
         });
 
-        playlist = moviesData
-          .filter(movie => movie.soundtrackData?.preview)
-          .map(movie => ({
-            track: movie.soundtrackData.track,
-            artist: movie.soundtrackData.artist,
-            movie: movie.title,
-            src: movie.soundtrackData.preview,
-            cover: movie.soundtrackData.cover
-          }));
+        // Ромком-Радио: сначала самые популярные найденные треки по Deezer Rank.
+        // Используем уже отсортированный Worker-ом soundtrackTracks, поэтому
+        // не делаем дополнительных запросов к Deezer на стороне сайта.
+        const radioTracks = [];
+        const seenRadioTracks = new Set();
+
+        moviesData.forEach(movie => {
+          const tracks = Array.isArray(movie.soundtrackTracks)
+            ? movie.soundtrackTracks
+            : [];
+
+          tracks.forEach(track => {
+            if (!track?.preview || !track.track) return;
+
+            const key = `${track.track}|${track.artist || ''}`.toLowerCase();
+            if (seenRadioTracks.has(key)) return;
+            seenRadioTracks.add(key);
+
+            radioTracks.push({
+              track: track.track,
+              artist: track.artist || 'Неизвестный исполнитель',
+              movie: movie.title,
+              src: track.preview,
+              cover: track.cover || movie.poster || null,
+              deezerRank: Number.isFinite(Number(track.deezerRank))
+                ? Number(track.deezerRank)
+                : null
+            });
+          });
+        });
+
+        // Чем выше Deezer Rank, тем выше трек в радио.
+        // Треки без рейтинга отправляем в конец.
+        playlist = radioTracks.sort((a, b) => {
+          if (a.deezerRank == null && b.deezerRank == null) return 0;
+          if (a.deezerRank == null) return 1;
+          if (b.deezerRank == null) return -1;
+          return b.deezerRank - a.deezerRank;
+        });
+
+        // Запасной вариант для старых данных Worker: если soundtrackTracks
+        // ещё не пришли, используем основной soundtrackData.
+        if (!playlist.length) {
+          playlist = moviesData
+            .filter(movie => movie.soundtrackData?.preview)
+            .map(movie => ({
+              track: movie.soundtrackData.track,
+              artist: movie.soundtrackData.artist,
+              movie: movie.title,
+              src: movie.soundtrackData.preview,
+              cover: movie.soundtrackData.cover,
+              deezerRank: movie.soundtrackData.deezerRank ?? null
+            }))
+            .sort((a, b) => {
+              if (a.deezerRank == null && b.deezerRank == null) return 0;
+              if (a.deezerRank == null) return 1;
+              if (b.deezerRank == null) return -1;
+              return b.deezerRank - a.deezerRank;
+            });
+        }
 
         autoDataLoaded = true;
         renderIcons();
@@ -4945,6 +5028,22 @@ function renderIcons() {
       document.getElementById("modalKpLink").href = movie.kinopoiskId ? `https://www.kinopoisk.ru/film/${movie.kinopoiskId}/` : `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(movie.title)}`;
       modal.classList.add("open");
     }
+
+  
+
+    // Подсказка при нажатии на почту
+    document.addEventListener('DOMContentLoaded', () => {
+      const mailSticker = document.getElementById('mailSticker');
+      const mailTip = document.getElementById('mailTip');
+      let mailTipTimer;
+      if (!mailSticker || !mailTip) return;
+
+      mailSticker.addEventListener('click', () => {
+        mailTip.classList.add('show');
+        clearTimeout(mailTipTimer);
+        mailTipTimer = setTimeout(() => mailTip.classList.remove('show'), 4500);
+      });
+    });
 
   </script>
 </body>
