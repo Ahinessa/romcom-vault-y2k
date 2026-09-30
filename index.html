@@ -496,6 +496,38 @@
       gap: 28px;
     }
 
+    .load-more-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0 4px;
+    }
+
+    .load-more-btn {
+      background: white;
+      color: var(--bubblegum-pink);
+      border: 3px solid var(--bubblegum-pink);
+      border-radius: 999px;
+      padding: 12px 28px;
+      font-family: 'Fredoka', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--bubblegum-pink);
+      transition: transform 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .load-more-btn:hover {
+      transform: translateY(-2px);
+      background: var(--bubblegum-pink);
+      color: white;
+      box-shadow: 4px 5px 0 var(--text-dark);
+    }
+
+    .load-more-btn:active {
+      transform: translateY(1px);
+      box-shadow: 2px 2px 0 var(--text-dark);
+    }
+
     .dvd-card {
       background: white;
       border-radius: 18px;
@@ -1024,6 +1056,9 @@
       </div>
 
       <div class="movies-grid" id="moviesGrid"></div>
+      <div class="load-more-wrap" id="loadMoreWrap">
+        <button class="load-more-btn" id="loadMoreBtn" type="button">Загрузить ещё</button>
+      </div>
     </section>
 
     <!-- РОМКОМ-РАДИО -->
@@ -4476,6 +4511,8 @@ let iconsList = [];
     let activeActorFilter = null;
     let searchQuery = "";
     let sortMode = "author";
+    const MOVIES_PER_PAGE = 12;
+    let visibleMoviesCount = MOVIES_PER_PAGE;
 
     document.addEventListener("DOMContentLoaded", () => {
       renderIcons();
@@ -4496,6 +4533,7 @@ let iconsList = [];
           el.style.transform = "";
         });
         renderIcons();
+        visibleMoviesCount = MOVIES_PER_PAGE;
         renderMovies();
       });
     });
@@ -4577,6 +4615,8 @@ function renderIcons() {
 
     function renderMovies() {
       const grid = document.getElementById("moviesGrid");
+      const loadMoreWrap = document.getElementById("loadMoreWrap");
+      const loadMoreBtn = document.getElementById("loadMoreBtn");
       grid.innerHTML = "";
 
       let list = [...moviesData];
@@ -4616,10 +4656,13 @@ function renderIcons() {
             <p style="color: #666; font-size: 0.9rem;">Попробуй сбросить фильтры или поискать другой троп!</p>
           </div>
         `;
+        if (loadMoreWrap) loadMoreWrap.style.display = "none";
         return;
       }
 
-      list.forEach(m => {
+      const moviesToRender = list.slice(0, visibleMoviesCount);
+
+      moviesToRender.forEach(m => {
         const card = document.createElement("div");
         card.className = "dvd-card";
         const fallbackSVG = createY2kPosterSVG(m.title, m.year);
@@ -4647,6 +4690,15 @@ function renderIcons() {
         card.addEventListener("click", () => openModal(m));
         grid.appendChild(card);
       });
+
+      if (loadMoreWrap && loadMoreBtn) {
+        const hasMore = visibleMoviesCount < list.length;
+        loadMoreWrap.style.display = hasMore ? "flex" : "none";
+        loadMoreBtn.onclick = () => {
+          visibleMoviesCount += MOVIES_PER_PAGE;
+          renderMovies();
+        };
+      }
     }
 
     function setupTagFilters() {
@@ -4656,6 +4708,7 @@ function renderIcons() {
           tags.forEach(t => t.classList.remove("active"));
           tagEl.classList.add("active");
           activeFilterTag = tagEl.dataset.tag;
+          visibleMoviesCount = MOVIES_PER_PAGE;
           renderMovies();
         });
       });
@@ -4665,6 +4718,7 @@ function renderIcons() {
       const input = document.getElementById("liveSearchInput");
       input.addEventListener("input", (e) => {
         searchQuery = e.target.value;
+        visibleMoviesCount = MOVIES_PER_PAGE;
         renderMovies();
       });
     }
@@ -4673,6 +4727,7 @@ function renderIcons() {
       const select = document.getElementById("sortSelect");
       select.addEventListener("change", (e) => {
         sortMode = e.target.value;
+        visibleMoviesCount = MOVIES_PER_PAGE;
         renderMovies();
       });
     }
