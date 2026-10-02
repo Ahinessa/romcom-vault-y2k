@@ -4347,7 +4347,7 @@ let iconsList = [];
 
     async function fetchAutoData() {
       try {
-        const batchSize = 8;
+        const batchSize = 2;
         const allResults = [];
 
         for (let i = 0; i < moviesData.length; i += batchSize) {
@@ -4359,9 +4359,17 @@ let iconsList = [];
               movies: batch.map(({ title, originalTitle, year, actors }) => ({ title, originalTitle, year, actors }))
             })
           });
-          if (!response.ok) throw new Error(`API ${response.status}`);
-          const payload = await response.json();
-          allResults.push(...(payload.movies || []));
+          const rawText = await response.text();
+          let payload = null;
+          try {
+            payload = JSON.parse(rawText);
+          } catch (_) {
+            throw new Error(`Worker вернул не JSON (HTTP ${response.status}): ${rawText.slice(0, 300)}`);
+          }
+          if (!response.ok || payload?.ok === false) {
+            throw new Error(`Worker API ${response.status}: ${payload?.error || rawText.slice(0, 300)}`);
+          }
+          allResults.push(...(Array.isArray(payload.movies) ? payload.movies : []));
         }
 
         const byId = new Map(allResults.map(item => [item.sourceTitle + "|" + item.year, item]));
@@ -4452,7 +4460,9 @@ let iconsList = [];
         renderMovies();
         setupRadioRefresh();
       } catch (error) {
-        console.warn("Автоматические данные не загрузились. Оставляем исходные данные:", error);
+        console.error("ROMCOM Worker: автоматические данные не загрузились:", error);
+        const radioSub = document.getElementById("radioSub");
+        if (radioSub) radioSub.innerText = `Ошибка Worker: ${error?.message || error}`;
         renderIcons();
         renderMovies();
         setupRadioRefresh();
